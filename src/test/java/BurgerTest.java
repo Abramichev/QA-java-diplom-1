@@ -83,7 +83,7 @@ public class BurgerTest {
         when(bun.getName()).thenReturn("red bun");
         when(bun.getPrice()).thenReturn(100f);
         burger.addIngredient(ingredient);
-        when(ingredient.getType()).thenReturn(IngredientType.FILLING);
+        when(ingredient.getType()).thenReturn(IngredientTypeTest.FILLING);
         when(ingredient.getName()).thenReturn("cutlet");
         when(ingredient.getPrice()).thenReturn(300f);
         String expectedReceipt = "(==== red bun ====)\r\n= filling cutlet =\r\n(==== red bun ====)\r\n\r\nPrice: 500,000000\r\n";
@@ -95,8 +95,8 @@ public class BurgerTest {
     @Test
     public void databaseTest() {
         buns.add(new Bun("black bun", 100));
-        ingredients.add(new Ingredient(IngredientType.SAUCE, "galaxy sauce", 100));
-        ingredients.add(new Ingredient(IngredientType.FILLING, "beef", 300));
+        ingredients.add(new Ingredient(IngredientTypeTest.SAUCE, "galaxy sauce", 100));
+        ingredients.add(new Ingredient(IngredientTypeTest.FILLING, "beef", 300));
         assertNotNull("Buns is not available", db.availableBuns());
         assertNotNull("Ingredients is not available", db.availableIngredients());
     }
