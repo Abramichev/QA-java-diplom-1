@@ -1,105 +1,112 @@
-import org.junit.Test;
+
+import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
+import org.junit.Assert;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import praktikum.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.when;
+import praktikum.Bun;
+import praktikum.Burger;
+import praktikum.Ingredient;
+import praktikum.IngredientType;
 
 
 @RunWith(MockitoJUnitRunner.class)
 public class BurgerTest {
+    @Mock
+    Bun bun;
+    @Mock
+    Ingredient cheese;
+    @Mock
+    Ingredient cutlet;
+    @Mock
+    Ingredient mayonnaise;
+    @Mock
+    Ingredient ketchup;
 
+    Burger burger;
 
-    private Burger burger;
-
+    public class Constants {
+        public static final float FLOAT_DELTA = 0.01f;
+    }
     @Before
     public void setUp() {
+        MockitoAnnotations.openMocks(this);
         burger = new Burger();
+        burger.addIngredient(cheese);
+        burger.addIngredient(cutlet);
+        burger.addIngredient(ketchup);
+
+        Mockito.when(bun.getPrice()).thenReturn(1.5f);
+        Mockito.when(cheese.getPrice()).thenReturn(2.0f);
+        Mockito.when(cutlet.getPrice()).thenReturn(3.0f);
+        Mockito.when(ketchup.getPrice()).thenReturn(0.5f);
+
+        Mockito.when(bun.getName()).thenReturn("КосмоБулка");
+        Mockito.when(cheese.getName()).thenReturn("КосмоСыр");
+        Mockito.when(cutlet.getName()).thenReturn("КосмоКотлета");
+        Mockito.when(ketchup.getName()).thenReturn("КосмоКетчуп");
+
+        Mockito.when(cheese.getType()).thenReturn(IngredientType.FILLING);
+        Mockito.when(cutlet.getType()).thenReturn(IngredientType.FILLING);
+        Mockito.when(ketchup.getType()).thenReturn(IngredientType.SAUCE);
     }
 
-    @Mock
-    private Bun bun;
-
-    @Mock
-    private List<Bun> buns = new ArrayList<>();
-
-    @Mock
-    private Ingredient ingredient;
-
-    @Mock
-    private List<Ingredient> ingredients = new ArrayList<>();
-
-    @Mock
-    private Database db;
-
-    @Test
-    public void addIngredientTest(){
-        burger.addIngredient(ingredient);
-        int expectedSize = 1;
-        int actualSize = burger.ingredients.size();
-        assertEquals("Неверное количество ингридиентов!",expectedSize, actualSize);
-
+    @After
+    public void shutdown() {
+        burger.bun = null;
+        burger.ingredients.clear();
     }
 
     @Test
-    public void removeIngredientTest(){
-        burger.addIngredient(ingredient);
+    public void setBunsSetBunNotNull() {
+        burger.setBuns(bun);
+        Assert.assertNotNull("Ожидалось, что будет добавлена булочка", burger.bun);
+    }
+
+    @Test
+    public void addIngredientAddIngredientToList() {
+        burger.addIngredient(mayonnaise);
+        Assert.assertEquals("Ожидалось, что в списке будет 4 ингредиента", 4, burger.ingredients.size());
+    }
+
+    @Test
+    public void removeIngredientDecreaseListSize() {
         burger.removeIngredient(0);
-        int expectedSize = 0;
-        int actualSize = burger.ingredients.size();
-        assertEquals("Не удалось удалить ингридиент!", expectedSize, actualSize);
+        Assert.assertEquals("Ожидалось, что в списке будет 2 ингредиента", 2, burger.ingredients.size());
+        Assert.assertFalse("Ожидалось, что в списке нет сыра", burger.ingredients.contains(cheese));
     }
 
     @Test
-    public void moveIngredientTest(){
-        burger.addIngredient(ingredient);
-        int currentIndex = burger.ingredients.indexOf(ingredient);
-        int newIndex = 0;
-        burger.moveIngredient(currentIndex, newIndex);
-        assertEquals("Не удалость переместить ингридиент!", burger.ingredients.size(), 1);
-        assertEquals(burger.ingredients.indexOf(ingredient), newIndex);
+    public void moveIngredientChangeIngredientIndex() {
+        burger.moveIngredient(0, 2);
+        Assert.assertEquals("Ожидалось, что индекс сыра станет = 2",
+                2, burger.ingredients.indexOf(cheese));
     }
 
     @Test
-    public void getPriceTest(){
+    public void getPriceReturnSumOfAllIngredients() {
+        float ingredientsSum = bun.getPrice() * 2 + cheese.getPrice() + cutlet.getPrice() + ketchup.getPrice();
         burger.setBuns(bun);
-        burger.addIngredient(ingredient);
-        when(bun.getPrice()).thenReturn(100f);
-        when(ingredient.getPrice()).thenReturn(300f);
-        float expectedPrice = 500;
-        float actualPrice = burger.getPrice();
-        assertEquals("Некорректная цена бурегра",expectedPrice, actualPrice, 0);
+        Assert.assertEquals("Цена неверная", ingredientsSum,
+                burger.getPrice(), Constants.FLOAT_DELTA);
     }
 
     @Test
-    public void getReceiptTest(){
+    public void getReceiptReturnAllIngredientsString() {
+        String expectedReceipt = "(==== КосмоБулка ====)\r\n" +
+                "= filling КосмоСыр =\r\n" +
+                "= filling КосмоКотлета =\r\n" +
+                "= sauce КосмоКетчуп =\r\n" +
+                "(==== КосмоБулка ====)\r\n" +
+                "\r\n" +
+                "Price: 8,500000\r\n";
+
         burger.setBuns(bun);
-        when(bun.getName()).thenReturn("red bun");
-        when(bun.getPrice()).thenReturn(100f);
-        burger.addIngredient(ingredient);
-        when(ingredient.getType()).thenReturn(IngredientTypeTest.FILLING);
-        when(ingredient.getName()).thenReturn("cutlet");
-        when(ingredient.getPrice()).thenReturn(300f);
-        String expectedReceipt = "(==== red bun ====)\r\n= filling cutlet =\r\n(==== red bun ====)\r\n\r\nPrice: 500,000000\r\n";
-        String actualReceipt = burger.getReceipt();
-        assertEquals("Состав рецепта неверный!", expectedReceipt, actualReceipt);
-
+        Assert.assertEquals("Не получен ожидаемый рецепт", expectedReceipt, burger.getReceipt());
     }
-
-    @Test
-    public void databaseTest() {
-        buns.add(new Bun("black bun", 100));
-        ingredients.add(new Ingredient(IngredientTypeTest.SAUCE, "galaxy sauce", 100));
-        ingredients.add(new Ingredient(IngredientTypeTest.FILLING, "beef", 300));
-        assertNotNull("Buns is not available", db.availableBuns());
-        assertNotNull("Ingredients is not available", db.availableIngredients());
-    }
-
-
 }
