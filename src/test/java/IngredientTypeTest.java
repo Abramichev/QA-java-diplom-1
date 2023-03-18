@@ -1,21 +1,31 @@
-import org.junit.Test;
 import praktikum.IngredientType;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
+
+@RunWith(Parameterized.class)
 public class IngredientTypeTest {
 
+    private final IngredientType ingredientType;
+    private final String stringIngredientType;
 
-    public static IngredientType SAUCE;
-    public static IngredientType FILLING;
-
-    @Test
-    public void getSauceTypeTest() {
-        assertEquals(IngredientType.SAUCE, IngredientType.valueOf("SAUCE"));
+    public IngredientTypeTest(IngredientType ingredientType, String stringIngredientType) {
+        this.ingredientType = ingredientType;
+        this.stringIngredientType = stringIngredientType;
     }
 
+    @Parameterized.Parameters
+    public static Object[][] getParameters() {
+        return new Object[][] {
+                {IngredientType.SAUCE, "SAUCE"},
+                {IngredientType.FILLING, "FILLING"}
+        };
+    }
     @Test
-    public void getFillingTypeTest() {
-        assertEquals(IngredientType.FILLING, IngredientType.valueOf("FILLING"));
+    public void valueOfReturnCorrectEnum() {
+        Assert.assertEquals("Результат не корректный, ожидалось: " + ingredientType.toString(),ingredientType, IngredientType.valueOf(stringIngredientType));
     }
 }
