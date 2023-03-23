@@ -18,7 +18,6 @@ public class Bun {
     {
         return name;
     }
-
     public float getPrice() {
         return price;
     }

@@ -22,7 +22,7 @@ public class IngredientTest {
         this.price = price;
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "Ингридиенты")
     public static Object[][] getParameters() {
         return new Object[][]{
                 {IngredientType.FILLING, "КосмоСыр", 7.50f},
